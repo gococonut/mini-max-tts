@@ -12,8 +12,35 @@ async def generate_tts_endpoint(request: TTSRequest, background_tasks: Backgroun
     if not settings.MINIMAX_API_KEY or not settings.MINIMAX_GROUP_ID:
         raise HTTPException(status_code=500, detail="API key or Group ID not configured")
 
-    job_id = str(uuid.uuid4())
-    output_filename_base = os.path.join(settings.OUTPUT_DIR, job_id)
+    # 验证输入参数
+    if not request.text and not request.file_path:
+        raise HTTPException(status_code=400, detail="Either text or file_path must be provided")
+
+    # 如果提供了文件路径，读取文件内容
+    text_to_process = request.text
+    if request.file_path:
+        if not os.path.exists(request.file_path):
+            raise HTTPException(status_code=400, detail=f"File not found: {request.file_path}")
+        try:
+            with open(request.file_path, 'r', encoding='utf-8') as file:
+                text_to_process = file.read()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+
+    # 确定输出路径和文件名
+    if request.output_dir:
+        output_dir = request.output_dir
+        # 确保输出目录存在
+        os.makedirs(output_dir, exist_ok=True)
+    else:
+        output_dir = settings.OUTPUT_DIR
+
+    if request.output_filename:
+        output_filename_base = os.path.join(output_dir, request.output_filename)
+    else:
+        job_id = str(uuid.uuid4())
+        output_filename_base = os.path.join(output_dir, job_id)
+
     output_mp3_path = f"{output_filename_base}.mp3"
     output_srt_path_potential = f"{output_filename_base}.srt" # Potential path
 
@@ -22,7 +49,7 @@ async def generate_tts_endpoint(request: TTSRequest, background_tasks: Backgroun
         # or handle timeouts carefully if running synchronously.
         # For simplicity here, running async inline:
         success, message, final_srt_path = await process_long_text_to_speech(
-            text=request.text,
+            text=text_to_process,
             enable_subtitles=request.enable_subtitles,
             output_mp3_path=output_mp3_path,
             output_srt_path_base=output_filename_base, # Pass base name

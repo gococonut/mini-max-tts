@@ -37,7 +37,7 @@ EXPOSE 8000
 
 # Define environment variables (can be overridden at runtime)
 # It's better to pass secrets like API keys at runtime, not build them in
-ENV OUTPUT_DIR="/app/output"
+ENV OUTPUT_DIR="/files"
 ENV LOG_LEVEL="INFO"
 
 # Run main.py when the container launches
