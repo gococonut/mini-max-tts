@@ -1,0 +1,7 @@
+fastapi>=0.95.0,<0.111.0 # Specify compatible ranges
+uvicorn[standard]>=0.20.0 # ASGI server
+httpx>=0.23.0 # Async HTTP client
+pydub>=0.25.0
+python-dotenv>=0.20.0 # For local .env loading
+requests # Keep if needed for sync subtitle download fallback, but httpx is preferred
+# Add any other specific libraries if needed
