@@ -29,8 +29,8 @@ RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
 # Copy the entire project into the container
 COPY . .
 
-# Create output directory (though usually mounted as a volume)
-RUN mkdir -p /app/output
+# Create necessary directories
+RUN mkdir -p /app/assets
 
 # Make port 80 available to the world outside this container
 EXPOSE 8000

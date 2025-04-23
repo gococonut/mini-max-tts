@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 应用程序架构
+
+## 核心组件
+- [main.py](mdc:app/main.py) - 应用程序入口点，包含主要的业务逻辑
+- [tts_processor.py](mdc:app/tts_processor.py) - TTS 处理核心模块，负责文本到语音的转换
+- [models.py](mdc:app/models.py) - 数据模型定义
+
+## 支持组件
+- [config.py](mdc:app/config.py) - 应用程序配置管理
+- [utils.py](mdc:app/utils.py) - 通用工具函数
+
+## 开发指南
+1. 所有新功能应该在适当的模块中实现
+2. 配置更改应在 `config.py` 中进行
+3. 共享功能应放在 `utils.py` 中
+4. 主要的业务逻辑应该在 `main.py` 中组织和协调

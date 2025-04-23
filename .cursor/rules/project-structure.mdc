@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 项目结构指南
+
+本项目是一个文本转语音（TTS）应用程序。以下是主要的项目组件：
+
+## 核心目录
+- `app/` - 主应用程序代码目录
+- `output/` - 生成的音频输出文件目录
+- `.venv/` - Python 虚拟环境目录
+
+## 关键文件
+- [requirements.txt](mdc:requirements.txt) - Python 依赖项配置
+- [Dockerfile](mdc:Dockerfile) - 容器化配置文件
+
+## 开发配置
+- `.vscode/` - VS Code 编辑器配置
+- `.gitignore` - Git 忽略规则配置

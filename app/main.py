@@ -42,40 +42,58 @@ async def generate_tts_endpoint(request: TTSRequest, background_tasks: Backgroun
         output_filename_base = os.path.join(output_dir, job_id)
 
     output_mp3_path = f"{output_filename_base}.mp3"
-    output_srt_path_potential = f"{output_filename_base}.srt" # Potential path
+    output_srt_path_potential = f"{output_filename_base}.srt"
+
+    # 处理默认 intro/outro
+    intro_file_url = request.intro_file_url
+    intro_start_time = request.intro_start_time
+    intro_end_time = request.intro_end_time
+    intro_fade_duration = request.intro_fade_duration
+    outro_file_url = request.outro_file_url
+
+    if request.use_default_intro:
+        intro_file_url = settings.DEFAULT_INTRO_FILE
+        intro_start_time = settings.DEFAULT_INTRO_START_TIME
+        intro_end_time = settings.DEFAULT_INTRO_END_TIME
+        intro_fade_duration = settings.DEFAULT_INTRO_FADE_DURATION
+
+    if request.use_default_outro:
+        outro_file_url = settings.DEFAULT_OUTRO_FILE
 
     try:
-        # Consider running the potentially long process in the background
-        # or handle timeouts carefully if running synchronously.
-        # For simplicity here, running async inline:
         success, message, final_srt_path = await process_long_text_to_speech(
             text=text_to_process,
             enable_subtitles=request.enable_subtitles,
             output_mp3_path=output_mp3_path,
-            output_srt_path_base=output_filename_base, # Pass base name
-            # Pass other optional params like voice_id, speed if needed
+            output_srt_path_base=output_filename_base,
+            intro_file_url=intro_file_url,
+            intro_start_time=intro_start_time,
+            intro_end_time=intro_end_time,
+            intro_fade_duration=intro_fade_duration,
+            outro_file_url=outro_file_url,
+            outro_fade_duration=request.outro_fade_duration,
+            outro_merge=request.outro_merge,
+            outro_merge_volume=request.outro_merge_volume
         )
 
         if success:
             return TTSResponse(
                 status="success",
                 message="TTS generation complete.",
-                audio_file=output_mp3_path, # Return path relative to container/host
-                srt_file=final_srt_path     # This will be the actual path or None
+                audio_file=output_mp3_path,
+                srt_file=final_srt_path
             )
         else:
             raise HTTPException(status_code=500, detail=f"TTS generation failed: {message}")
 
     except Exception as e:
-        # Log the exception details properly
-        print(f"Error during TTS generation: {e}") # Replace with proper logging
+        print(f"Error during TTS generation: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
 
-# Add lifespan event to create output dir on startup if needed
 @app.on_event("startup")
 async def startup_event():
     os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
